@@ -2,7 +2,7 @@
 
 ## Description
 
-Welcome ! SISSE IA is a NLP application, built with `NodeJs` and `GraphQL`.
+Welcome ! Boilerplate-graphql, built with `NodeJs` and `GraphQL`.
 
 ## Getting started
 
