@@ -3,8 +3,6 @@ import logger from '@tools/logger';
 import tokenManager from '@security/tokenManager.js';
 import DBManager from '@db-manager/index.js';
 import { checkAes } from '@security/aes.js';
-import crypto from 'crypto-js';
-import moment from 'moment-with-locales-es6';
 
 class AuthController {
     constructor() {
