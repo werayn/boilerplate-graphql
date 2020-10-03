@@ -1,8 +1,8 @@
 /* eslint-disable no-empty-pattern */
 /* eslint-disable prefer-const */
-import { SchemaDirectiveVisitor } from 'apollo-server-express';
+import { SchemaDirectiveVisitor, ApolloError } from 'apollo-server-express';
 import { defaultFieldResolver } from 'graphql';
-import { User } from '@models/';
+import { User } from '@models/index.js';
 import to from 'await-to-js';
 // Tools
 import logger from '@tools/logger';
@@ -20,7 +20,7 @@ export class IsAuthUserDirective extends SchemaDirectiveVisitor {
                 return result;
             } else {
                 logger.error(`You must be the authenticated user to get this information: ${JSON.stringify(user)}`);
-                throw new Error('You must be the authenticated user to get this information');
+                throw new ApolloError('You must be the authenticated user to get this information', 'UNAUTHORIZED');
             }
         };
     }
@@ -33,8 +33,8 @@ export class IsAuthDirective extends SchemaDirectiveVisitor {
             let userInfo;
             [, {}, {user: userInfo}] = args;
             if (!userInfo){
-                logger.error(`User not auth: ${JSON.stringify(userInfo)}`);
-                throw new Error('User not authenticated');
+                logger.error('User not auth');
+                throw new ApolloError('User not authenticated', 'UNAUTHENTICATED');
             }
 
             let err, authUser;
@@ -44,7 +44,7 @@ export class IsAuthDirective extends SchemaDirectiveVisitor {
                     logger.error(`User not found: ${JSON.stringify(err)}`);
                 }
                 logger.error(`User not found: ${JSON.stringify(authUser)}`);
-                throw new Error('JWT token received, User not found, and not authenticated');
+                throw new ApolloError('JWT token received, User not found, and not authenticated', ' UNPROCESSABLE_ENTITY');
             }
 
             args[2].authUser = authUser;

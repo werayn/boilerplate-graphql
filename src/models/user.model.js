@@ -1,4 +1,4 @@
-import { Model } from 'sequelize';
+import Sequelize, { DataTypes } from 'sequelize';
 import bcrypt from 'bcrypt';
 import jsonwebtoken from 'jsonwebtoken';
 import to from 'await-to-js';
@@ -7,41 +7,7 @@ import { env } from '@config/env.js';
 // Tools
 import logger from '@tools/logger';
 
-class User extends Model {
-    static init(sequelize, DataTypes) {
-        return super.init(
-            {
-                id: {
-                    type: DataTypes.NUMBER,
-                    primaryKey: true,
-                    autoIncrement: true,
-                    allowNull: false,
-                },
-                firstName: {
-                    type: DataTypes.STRING,
-                },
-                lastName: {
-                    type: DataTypes.STRING,
-                },
-                userName: {
-                    type: DataTypes.STRING,
-                    allowNull: false,
-                },
-                email: {
-                    type: DataTypes.STRING,
-                },
-                password: {
-                    type: DataTypes.STRING,
-                    allowNull: false,
-                },
-            },
-            {
-                modelName: 'app_user',
-                sequelize,
-            }
-        );
-    }
-
+class User extends Sequelize.Model {
     static async hashPassword(user) {
         let err;
         if (user.changed('password')){
@@ -88,4 +54,28 @@ class User extends Model {
     }
 }
 
-export { User };
+const schema = {
+    userId: {
+        type: DataTypes.INTEGER,
+    },
+    firstName: {
+        type: DataTypes.STRING,
+    },
+    lastName: {
+        type: DataTypes.STRING,
+    },
+    userName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+    },
+    email: {
+        type: DataTypes.STRING,
+    },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+};
+
+export { User, schema };

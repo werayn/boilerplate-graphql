@@ -1,15 +1,16 @@
-import { resolver as rs } from 'graphql-sequelize';
-import { User } from '@models';
+/* eslint-disable prefer-const */
+import { resolver } from 'graphql-sequelize';
+import  { db } from '@models/index.js';
 import to from 'await-to-js';
 // Tools
 import logger from '@tools/logger';
 
 export const Mutation = {
-    createUser: rs(User, {
+    createUser: resolver(db.User, {
         before: async (findOptions, { data }) => {
-            let err = null;
-            let user = null;
-            [err, user] = await to(User.create(data) );
+            let err;
+            let user;
+            [err, user] = await to(db.User.create(data));
             if (err) {
                 logger.error(`Mut createUser err: ${err}`);
                 throw err;

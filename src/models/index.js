@@ -1,7 +1,7 @@
-import { Sequelize } from 'sequelize';
-import path from 'path';
+import Sequelize from 'sequelize';
 // Config
 import { env } from '@config/env.js';
+import { User, schema } from './user.model.js';
 
 export const sequelize = new Sequelize({
     host: env.DB_HOST,
@@ -13,9 +13,13 @@ export const sequelize = new Sequelize({
     operatorsAliases: '0',
     logging: false,
     storage: ':memory:',
-    modelPaths: [path.join(__dirname, '/*.model.ts')],
-    modelMatch: (filename, member) => {
-        return filename.substring(0, filename.indexOf('.model')) === member.toLowerCase();
-    },
 });
-export { User } from './user.model';
+
+const models = {
+    User: User.init(schema, {sequelize, tableName: 'app_user'}),
+};
+
+export const db = {
+    ...models,
+    sequelize,
+};

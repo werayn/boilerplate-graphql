@@ -1,12 +1,12 @@
 /* eslint-disable no-empty-pattern */
 import { resolver } from 'graphql-sequelize';
-import { User } from '../../models';
+import { db } from '@models/index.js';
 import to from 'await-to-js';
 // Tools
 import logger from '@tools/logger';
 
 export const Query = {
-    getUser: resolver(User, {
+    getUser: resolver(db.User, {
         before: async (findOptions, {}, {user}) => {
             findOptions.where = {id: user.id};
             return findOptions;
@@ -15,7 +15,7 @@ export const Query = {
             return user;
         },
     }),
-    loginUser: resolver(User, {
+    loginUser: resolver(db.User, {
         before: async (findOptions, { username }) => {
             findOptions.where = {username};
             return findOptions;

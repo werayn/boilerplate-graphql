@@ -6,7 +6,7 @@ import to from 'await-to-js';
 import { createContext, EXPECTED_OPTIONS_KEY } from 'dataloader-sequelize';
 import jwt from 'express-jwt';
 //graphql
-import { sequelize } from './models';
+import { sequelize } from '@models';
 import { resolver as resolvers, schema, schemaDirectives } from './graphql';
 // Tools
 import logger from '@tools/logger';
