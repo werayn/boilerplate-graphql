@@ -6,9 +6,9 @@
  * @version 1.0
  * @since 1.0
  */
-function isDev() {
+const isDev = () => {
     return (process.env.NODE_ENV === 'development');
-}
+};
 
 /**
  * @function isBrowser
@@ -18,11 +18,11 @@ function isDev() {
  * @version 1.0
  * @since 1.0
  */
-function isBrowser() {
+const isBrowser = () => {
     if (typeof window === 'undefined' && window.document === 'undefined') {
         return false;
     }
     return true;
-}
+};
 
 export { isDev, isBrowser };

@@ -1,57 +1,80 @@
+/* eslint-disable prefer-const */
 import express from 'express';
-import bodyParser from 'body-parser';
-import cors from 'cors';
 import dotenv from 'dotenv';
-import { ApolloServer, gql } from 'apollo-server-express';
-import typeDefs from './graphql/schema';
-import resolvers from './graphql/resolvers';
+import { ApolloServer } from 'apollo-server-express';
+import to from 'await-to-js';
+import { createContext, EXPECTED_OPTIONS_KEY } from 'dataloader-sequelize';
+import jwt from 'express-jwt';
+//graphql
+import { sequelize } from './models';
+import { resolver as resolvers, schema, schemaDirectives } from './graphql';
 // Tools
 import logger from '@tools/logger';
 // Middleware
 import { loggerMiddleware } from '@middleware/logger.middleware.js';
-// Db
-import db from './db';
+import { errorMiddleware } from '@middleware/error.middleware.js';
+// Config
+import { env } from '@config/env.js';
 
 dotenv.config();
 
+const app = express();
+
 class App {
     constructor() {
-        this.app = express();
-        this.server = new ApolloServer({
-            typeDefs: gql(typeDefs),
-            resolvers,
-            context: { db },
-        });
-
-        this.initializeMiddlewares = this.initializeMiddlewares.bind(this);
-        this.initializeMiddlewares();
+        this.initializeAppMiddlewares = this.initializeAppMiddlewares.bind(this);
+        this.initializeGraphQL = this.initializeGraphQL.bind(this);
+        this.initializeAppMiddlewares();
+        this.initializeGraphQL(this.app);
     }
 
     listen() {
-        db.sequelize.sync().then(() => {
-            this.app.listen(process.env.PORT, () => {
-                logger.info('/*************** *************** ***************/');
-                logger.info('/*************** STARTING SERVER ***************/');
-                logger.info('/*************** *************** ***************/');
-                logger.info(`🚀 Server ready and listening HTTP on the port ${process.env.PORT}`);
-            }).on('error', (err) => {
+        app.listen({ port: env.PORT }, async () => {
+            logger.info('/*************** *************** ***************/');
+            logger.info('/*************** STARTING SERVER ***************/');
+            logger.info('/*************** *************** ***************/');
+            logger.info(`🚀 Server ready at http://localhost:${env.PORT}/graphql`);
+
+            let err;
+            [err] = await to(sequelize.sync(
+                //{force: true}
+            ));
+            if (err) {
                 logger.error(err);
-                process.exit(1);
-            });
-        }).on('error', (err) => {
-            logger.error(err);
-            process.exit(1);
+                logger.info('Error: Cannot connect to database');
+            } else {
+                logger.info(`Connected to database: ${env.DB_NAME}`);
+            }
         });
     }
 
-    initializeMiddlewares() {
-        this.app.use(cors());
-        this.app.use(bodyParser.json({limit: '50mb', extended: true}));
-        this.app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-        this.app.use(loggerMiddleware);
+    initializeGraphQL() {
+        const server = new ApolloServer({
+            typeDefs: schema,
+            resolvers,
+            schemaDirectives,
+            playground: true,
+            context: ({ req }) => {
+                const nreq = req;
+                const user = nreq.user;
+                return {
+                    [EXPECTED_OPTIONS_KEY]: createContext(sequelize),
+                    user: user,
+                };
+            },
+        });
+        server.applyMiddleware({ app });
+    }
 
-        this.server.applyMiddleware( this.app );
-
+    initializeAppMiddlewares() {
+        app.use(loggerMiddleware);
+        const jwtMiddleware = jwt({
+            secret: env.JWT_ENCRYPTION,
+            credentialsRequired: false,
+            algorithms: ['RS256'],
+        });
+        app.use(jwtMiddleware);
+        app.use(errorMiddleware);
     }
 }
 

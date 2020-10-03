@@ -11,11 +11,14 @@
             ],
             "alias": {
               "@controllers": "./src/controllers",
+              "@config": "./src/config",
               "@middleware": "./src/middleware",
               "@db-manager": "./src/db-manager",
               "@security": "./src/security",
               "@queries": "./src/queries",
-              "@tools": "./src/tools"
+              "@tools": "./src/tools",
+              "@graph": "./src/graphql",
+              "@models": "./src/models"
             }
           }
         ],
@@ -27,6 +30,12 @@
             "helpers": true,
             "regenerator": true,
             "useESModules": false
+          }
+        ],
+        [
+          "@babel/plugin-proposal-decorators",
+          {
+            "legacy": true
           }
         ]
       ]
