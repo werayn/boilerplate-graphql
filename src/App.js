@@ -6,13 +6,14 @@ import to from 'await-to-js';
 import { createContext, EXPECTED_OPTIONS_KEY } from 'dataloader-sequelize';
 import jwt from 'express-jwt';
 //graphql
+import { resolver } from 'graphql-sequelize';
 import { sequelize } from '@models';
 import { resolver as resolvers, schema, schemaDirectives } from './graphql';
 // Tools
 import logger from '@tools/logger';
 // Middleware
-import { loggerMiddleware } from '@middleware/logger.middleware.js';
 import { errorMiddleware } from '@middleware/error.middleware.js';
+import { loggerMiddleware } from '@middleware/logger.middleware.js';
 // Config
 import { env } from '@config/env.js';
 
@@ -55,11 +56,18 @@ class App {
             schemaDirectives,
             playground: true,
             context: ({ req }) => {
+                const dataloaderContext = createContext(sequelize);
+                // Magic swap for key in context
+                resolver.contextToOptions = {
+                    dataloaderContext: [EXPECTED_OPTIONS_KEY],
+                };
                 const nreq = req;
+                const token = req.headers.authorization || '';
                 const user = nreq.user;
                 return {
-                    [EXPECTED_OPTIONS_KEY]: createContext(sequelize),
                     user: user,
+                    token: token,
+                    dataloaderContext,
                 };
             },
         });
@@ -71,7 +79,7 @@ class App {
         const jwtMiddleware = jwt({
             secret: env.JWT_ENCRYPTION,
             credentialsRequired: false,
-            algorithms: ['RS256'],
+            algorithms: ['HS256'],
         });
         app.use(jwtMiddleware);
         app.use(errorMiddleware);

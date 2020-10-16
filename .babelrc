@@ -10,12 +10,9 @@
               "./src"
             ],
             "alias": {
-              "@controllers": "./src/controllers",
               "@config": "./src/config",
               "@middleware": "./src/middleware",
-              "@db-manager": "./src/db-manager",
               "@security": "./src/security",
-              "@queries": "./src/queries",
               "@tools": "./src/tools",
               "@graph": "./src/graphql",
               "@models": "./src/models"

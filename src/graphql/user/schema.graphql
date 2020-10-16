@@ -1,10 +1,15 @@
+type Jwt {
+   accessToken: String
+   refreshToken: String
+}
+
 type User {
    id: Int
    email: String
    firstName: String
    lastName: String
    userName: String
-   jwt: String @isAuthUser
+   jwt: Jwt
 }
 
 input UserInput {
@@ -17,7 +22,7 @@ input UserInput {
 
 type Query {
    getUser: User @isAuth
-   loginUser(username: String!, password: String!): User
+   loginUser(userName: String!, password: String!): User
 }
 
 type Mutation {

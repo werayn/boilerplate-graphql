@@ -8,25 +8,6 @@ import { env } from '@config/env.js';
 import logger from '@tools/logger';
 
 class User extends Sequelize.Model {
-    static async hashPassword(user) {
-        let err;
-        if (user.changed('password')){
-            let salt, hash;
-            [err, salt] = await to(bcrypt.genSalt(10));
-            if (err) {
-                logger.error(`Err: HashPasword ${err}`);
-                throw err;
-            }
-
-            [err, hash] = await to(bcrypt.hash(user.password, salt));
-            if (err) {
-                logger.error(`Err: HashPasword ${err}`);
-                throw err;
-            }
-            user.password = hash;
-        }
-    }
-
     async comparePassword(pw) {
         let err = null;
         let pass = null;
@@ -48,16 +29,18 @@ class User extends Sequelize.Model {
     }
 
     getJwt(){
-        return 'Bearer ' + jsonwebtoken.sign({
-            id: this.id,
-        }, env.JWT_ENCRYPTION, { expiresIn: env.JWT_EXPIRATION });
+        return {
+            accessToken: 'Bearer ' + jsonwebtoken.sign({
+                id: this.id,
+            }, env.JWT_ENCRYPTION, { expiresIn: env.JWT_EXPIRATION }),
+            refreshToken: 'Bearer ' + jsonwebtoken.sign({
+                id: this.id,
+            }, env.JWT_REFRESH_ENCRYPTION, { expiresIn: env.JWT_REFRESH_EXPIRATION }),
+        };
     }
 }
 
 const schema = {
-    userId: {
-        type: DataTypes.INTEGER,
-    },
     firstName: {
         type: DataTypes.STRING,
     },
